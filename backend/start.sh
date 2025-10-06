@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Activate virtual environment
+pip install -r requirements.txt > installation_logs.txt 2>&1
 source venv/bin/activate
 
 # Function to handle cleanup
