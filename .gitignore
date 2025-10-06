@@ -1,0 +1,100 @@
+# =====================================================
+# Root Gitignore (covers backend/ and frontend/)
+# =====================================================
+
+# ------------------------
+# Common / General
+# ------------------------
+.DS_Store
+*.pem
+*.log
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+*.egg-info/
+dist/
+build/
+.env
+.env.*
+!.env.example
+
+# =====================================================
+# BACKEND (Python)
+# =====================================================
+
+backend/__pycache__/
+backend/*.py[cod]
+backend/*.egg-info/
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/.venv/
+backend/venv/
+backend/env/
+backend/.env
+backend/.env.*
+backend/.ipynb_checkpoints/
+backend/.python-version
+
+# Virtual environments
+venv/
+env/
+.venv/
+env.bak/
+
+# IDE / Editor stuff
+.vscode/
+.idea/
+*.swp
+
+# =====================================================
+# FRONTEND (Next.js)
+# =====================================================
+
+# Dependencies
+frontend/node_modules/
+frontend/.pnp
+frontend/.pnp.*
+frontend/.yarn/*
+!frontend/.yarn/patches
+!frontend/.yarn/plugins
+!frontend/.yarn/releases
+!frontend/.yarn/versions
+
+# Build output
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Testing
+frontend/coverage/
+
+# Env files
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Debug / Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnpm-debug.log*
+
+# Misc
+frontend/.DS_Store
+frontend/*.pem
+
+# Vercel / Deployment
+frontend/.vercel/
+
+# TypeScript
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# =====================================================
+# End
+# =====================================================
