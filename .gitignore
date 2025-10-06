@@ -83,6 +83,7 @@ frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 frontend/.pnpm-debug.log*
+*/*_log.txt
 
 # Misc
 frontend/.DS_Store
