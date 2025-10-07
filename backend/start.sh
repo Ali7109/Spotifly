@@ -1,7 +1,13 @@
 #!/bin/bash
 
+# If log file exists, remove it
+[ -f installation_log.txt ] && rm installation_log.txt
+
+# Create virtual environment if it doesn't exist
+[ ! -d venv ] && python3 -m venv venv
+pip install -r requirements.txt > installation_log.txt 2>&1
+
 # Activate virtual environment
-pip install -r requirements.txt > installation_logs.txt 2>&1
 source venv/bin/activate
 
 # Function to handle cleanup
