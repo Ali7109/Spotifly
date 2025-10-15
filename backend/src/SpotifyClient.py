@@ -181,6 +181,33 @@ class SpotifyClient:
             print(f"Error fetching playlists: {e}")
         return None
 
+    def fetch_playlist_tracks(self, user_access_token, playlist_id, limit=100):
+        """Fetch tracks in a specific playlist"""
+        headers = {
+            "Authorization": f"Bearer {user_access_token}",
+            "Content-Type": "application/json",
+        }
+        params = {"limit": limit}
+        try:
+            response = requests.get(
+                f"{self.base_url}/playlists/{playlist_id}/tracks",
+                headers=headers,
+                params=params,
+            )
+            if response.status_code == 200:
+                items = response.json().get("items", [])
+                track_uris = [
+                    item["track"]["uri"] for item in items if item.get("track")
+                ]
+                return track_uris
+            else:
+                print(
+                    f"Error fetching playlist tracks: {response.status_code} - {response.text}"
+                )
+        except Exception as e:
+            print(f"Error fetching playlist tracks: {e}")
+        return None
+
     # Add track to playlist called playlist_name, create if doesn't exist. If track exists, do nothing
     def add_track_to_playlist(self, user_access_token, playlist_name, track_uri):
         """Add a track to a user's playlist, creating the playlist if it doesn't exist"""
@@ -229,6 +256,15 @@ class SpotifyClient:
                         return False
 
                 # Step 3: Add the track to the playlist
+
+                # Step 3.5: Make sure track is not already in playlist
+                existing_tracks = self.fetch_playlist_tracks(
+                    user_access_token, playlist_id
+                )
+                if existing_tracks and track_uri in existing_tracks:
+                    print("Track is already in the playlist")
+                    return True
+
                 add_payload = {"uris": [track_uri]}
                 add_response = requests.post(
                     f"{self.base_url}/playlists/{playlist_id}/tracks",
