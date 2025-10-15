@@ -216,3 +216,7 @@ button:active {
 .add_to_playlist:hover {
 	background: #1ed760;
 }
+
+.add_to_playlist:disabled {
+	background: #191414;
+}

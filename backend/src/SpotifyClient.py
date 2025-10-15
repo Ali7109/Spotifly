@@ -181,7 +181,7 @@ class SpotifyClient:
             print(f"Error fetching playlists: {e}")
         return None
 
-    # Add track to playlist called playlist_name, create if doesn't exist
+    # Add track to playlist called playlist_name, create if doesn't exist. If track exists, do nothing
     def add_track_to_playlist(self, user_access_token, playlist_name, track_uri):
         """Add a track to a user's playlist, creating the playlist if it doesn't exist"""
         headers = {

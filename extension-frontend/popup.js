@@ -121,6 +121,42 @@ function showLoggedIn(user) {
 	}, 100);
 }
 
+// Add song to playlist (example function)
+async function addSongToPlaylist(trackUri) {
+	const tokens = await chrome.storage.local.get(["access_token"]);
+
+	if (!tokens.access_token) {
+		alert("You must be logged in to add songs to a playlist.");
+		return;
+	}
+	try {
+		const response = await fetch(
+			`${API_BASE}/spotify/playlists/add-track?playlist_name=YouTubePlays&track_uri=${encodeURIComponent(
+				trackUri
+			)}`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${tokens.access_token}`,
+				},
+			}
+		);
+		if (response.ok) {
+			console.log("Track added to playlist");
+			return true;
+		} else {
+			const errorData = await response.json();
+			console.error("Error adding track:", errorData);
+			return false;
+		}
+	} catch (error) {
+		console.error("Error adding track to playlist:", error);
+		alert("An error occurred while adding the track.");
+		return false;
+	}
+}
+
 // Receive YouTube title from background
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.action === "youtubeTitle") {
@@ -189,6 +225,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 							const uri = addButton.getAttribute("data-uri");
 							console.log("Add to playlist:", uri);
 							// Call your backend or Spotify API here
+
+							addSongToPlaylist(uri).then((success) => {
+								if (success) {
+									addButton.textContent = "✓ Added";
+									addButton.disabled = true;
+								} else {
+									alert("Uh oh, we couldn't add that song.");
+								}
+							});
 						});
 
 						// Assemble

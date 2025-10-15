@@ -187,7 +187,6 @@ async def get_user_playlists(user_id: str = Depends(get_current_user), limit: in
     raise HTTPException(status_code=500, detail="Unable to fetch playlists")
 
 
-# Add track_uri to playlist_name: playlist_name, track_uri
 @app.post("/spotify/playlists/add-track")
 async def add_track_to_playlist(
     playlist_name: str,
@@ -198,6 +197,11 @@ async def add_track_to_playlist(
     user_token = auth_manager.get_user_access_token(user_id)
     if not user_token:
         raise HTTPException(status_code=401, detail="No valid token found")
+
+    # Ensure track_uri is in correct format
+    if not track_uri.startswith("spotify:track:"):
+        # If it's just an ID, convert it
+        track_uri = f"spotify:track:{track_uri}"
 
     success = spotify_client.add_track_to_playlist(user_token, playlist_name, track_uri)
     if success:

@@ -20,6 +20,7 @@ SCOPES = [
     "user-read-recently-played",
     "playlist-read-private",
     "user-library-read",
+    "playlist-modify-private",
 ]
 
 
