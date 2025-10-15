@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Spotify Stats</title>
+		<link rel="stylesheet" href="popup.css" />
+	</head>
+	<body>
+		<div class="container">
+			<h1>🎵 Spotify Stats</h1>
+
+			<div id="loading" class="loading">
+				<p>Loading...</p>
+			</div>
+
+			<div id="logged-out" class="hidden">
+				<div class="status">Not connected to Spotify</div>
+				<button class="login-btn" id="login-btn">
+					Connect with Spotify
+				</button>
+			</div>
+
+			<div id="logged-in" class="hidden">
+				<div class="user-info" id="user-info">
+					<!-- User info will be inserted here -->
+				</div>
+				<button class="logout-btn" id="logout-btn">Disconnect</button>
+			</div>
+		</div>
+
+		<script src="popup.js"></script>
+	</body>
+</html>
