@@ -49,6 +49,14 @@ async def login():
     return {"auth_url": auth_url}
 
 
+# Handle logout
+@app.get("/auth/logout")
+async def logout(user_id: str = Depends(get_current_user)):
+    """Logout user by deleting their tokens"""
+    auth_manager.delete_user_tokens(user_id)
+    return {"detail": "Logged out successfully"}
+
+
 @app.get("/auth/callback")
 async def callback(code: str):
     """Handle Spotify callback and exchange code for tokens"""

@@ -34,7 +34,7 @@ class AuthManager:
             "response_type": "code",
             "redirect_uri": REDIRECT_URI,
             "scope": " ".join(SCOPES),
-            "show_dialog": "false",  # Set to "true" to force login dialog
+            "show_dialog": "true",  # Changed to "true" to force login dialog
         }
         return f"{SPOTIFY_AUTH_URL}?{urlencode(params)}"
 
@@ -120,3 +120,11 @@ class AuthManager:
         """Verify a token and return the associated user_id"""
         user_id = self.cache.get(f"token:{token}")
         return user_id
+
+    def delete_user_tokens(self, user_id):
+        """Delete user's tokens from cache (logout)"""
+        access_token = self.cache.get(f"user:{user_id}:access_token")
+        if access_token:
+            self.cache.delete(f"token:{access_token}")
+        self.cache.delete(f"user:{user_id}:access_token")
+        self.cache.delete(f"user:{user_id}:refresh_token")
