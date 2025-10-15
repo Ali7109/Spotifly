@@ -3,8 +3,19 @@
 	"name": "Spotify Stats Extension",
 	"version": "1.0",
 	"description": "Connect to your Spotify account and view your stats",
-	"permissions": ["storage", "tabs", "notifications", "webRequest"],
-	"host_permissions": ["http://localhost:8080/*", "http://localhost:3000/*"],
+	"permissions": [
+		"storage",
+		"tabs",
+		"notifications",
+		"webRequest",
+		"scripting",
+		"activeTab"
+	],
+	"host_permissions": [
+		"http://localhost:8080/*",
+		"http://localhost:3000/*",
+		"*://*.youtube.com/*"
+	],
 	"action": {
 		"default_popup": "popup.html",
 		"default_icon": {
