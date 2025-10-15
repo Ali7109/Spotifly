@@ -102,20 +102,19 @@ function showLoggedIn(user) {
 	loggedOut.classList.add("hidden");
 	loggedIn.classList.remove("hidden");
 
-	const imageUrl =
-		user.images && user.images.length > 0 ? user.images[0].url : "";
 	const displayName = user.display_name || user.id;
+	const firstName = displayName.split(" ")[0];
 	const email = user.email || "";
 	const externalUrl = user.external_urls ? user.external_urls.spotify : "#";
 
 	userInfo.innerHTML = `
-        ${imageUrl ? `<img src="${imageUrl}" alt="Profile">` : ""}
         <h2>
-        ${displayName}
+        ${firstName}
         <a href="${externalUrl}" target="_blank" id="spotify-external-link">↗</a>
         </h2>
         ${email ? `<p>${email}</p>` : ""}
         <p id="spotify-connected">Connected ✓</p>
+        
     `;
 }
 
