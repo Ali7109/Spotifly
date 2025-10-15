@@ -21,65 +21,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				console.log("Injecting script into tab:", tab);
 				if (tab?.id && tab.url.includes("youtube.com/watch")) {
 					try {
-						const [{ result }] =
-							await chrome.scripting.executeScript({
-								target: { tabId: tab.id },
-								func: () => {
-									return new Promise((resolve) => {
-										const maxWait = 5000; // max 5 seconds
-										const interval = 200;
-										let waited = 0;
+						const title = tab?.title;
 
-										const checkTitle = () => {
-											let title =
-												document.querySelector(
-													'meta[name="title"]'
-												)?.content ||
-												document
-													.querySelector(
-														"h1.ytd-watch-metadata yt-formatted-string"
-													)
-													?.textContent?.trim() ||
-												document
-													.querySelector(
-														"ytd-watch-metadata yt-formatted-string[title]"
-													)
-													?.textContent?.trim() ||
-												document
-													.querySelector(
-														"#container h1.title"
-													)
-													?.textContent?.trim() ||
-												document.title
-													.replace(" - YouTube", "")
-													.trim();
-
-											if (title && title.length > 0) {
-												resolve(title);
-											} else if (waited >= maxWait) {
-												resolve(null);
-											} else {
-												waited += interval;
-												setTimeout(
-													checkTitle,
-													interval
-												);
-											}
-										};
-
-										checkTitle();
-									});
-								},
-							});
-
-						console.log("Extracted YouTube title:", result);
+						// Clean title by removing " - YouTube" suffix if present
+						let cleanedTitle = title
+							.replace(" - YouTube", "")
+							.trim();
+						if (
+							cleanedTitle.length > 3 &&
+							cleanedTitle.substring(0, 3) === "(1)"
+						) {
+							cleanedTitle = cleanedTitle.substring(3).trim();
+						}
+						console.log("Extracted YouTube title:", cleanedTitle);
 
 						chrome.runtime.sendMessage({
 							action: "youtubeTitle",
-							title: result,
+							title: cleanedTitle,
 						});
 					} catch (err) {
-						console.error("Script injection failed:", err);
 						chrome.runtime.sendMessage({
 							action: "youtubeTitle",
 							title: null,
