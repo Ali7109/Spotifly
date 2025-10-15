@@ -134,6 +134,12 @@ class SpotifyClient:
             print(f"Error fetching recently played: {e}")
         return None
 
+    """
+    Example usage:
+    spotify_client = SpotifyClient(access_cache)
+    results = spotify_client.search_tracks("Imagine Dragons", limit=5)
+    """
+
     def search_tracks(self, query, limit=20):
         """Search for tracks using service token (no user auth needed)"""
         token = self.get_token()

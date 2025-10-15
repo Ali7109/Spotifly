@@ -158,6 +158,15 @@ async def get_recently_played(
     )
 
 
+@app.get("/spotify/search")
+async def search_tracks(query: str, limit: int = 5):
+    """Search for tracks (no user auth needed)"""
+    results = spotify_client.search_tracks(query, limit)
+    if results:
+        return results
+    raise HTTPException(status_code=500, detail="Unable to search tracks")
+
+
 @app.get("/auth/me")
 async def get_current_user_info(user_id: str = Depends(get_current_user)):
     """Get current authenticated user ID"""

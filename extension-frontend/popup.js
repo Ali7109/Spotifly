@@ -17,7 +17,6 @@ async function checkAuthStatus() {
 	]);
 
 	if (tokens.access_token && tokens.user) {
-		// Try to fetch profile to verify token is still valid
 		try {
 			const response = await fetch(`${API_BASE}/spotify/profile`, {
 				headers: {
@@ -30,7 +29,6 @@ async function checkAuthStatus() {
 				showLoggedIn(profile);
 				return;
 			} else if (response.status === 401) {
-				// Token expired, try to refresh
 				const refreshed = await refreshToken();
 				if (refreshed) {
 					const newTokens = await chrome.storage.local.get([
@@ -66,9 +64,7 @@ async function refreshToken() {
 		"refresh_token",
 	]);
 
-	if (!tokens.access_token) {
-		return false;
-	}
+	if (!tokens.access_token) return false;
 
 	try {
 		const response = await fetch(`${API_BASE}/auth/refresh`, {
@@ -102,21 +98,64 @@ function showLoggedIn(user) {
 	loggedOut.classList.add("hidden");
 	loggedIn.classList.remove("hidden");
 
-	const displayName = user.display_name || user.id;
-	const firstName = displayName.split(" ")[0];
-	const email = user.email || "";
-	const externalUrl = user.external_urls ? user.external_urls.spotify : "#";
+	let displayName = user.display_name || user.id;
+	if (!displayName) {
+		const email = user.email || "";
+		displayName = email.includes("@") ? email.split("@")[0] : "User";
+	} else {
+		displayName = displayName.trim().split(" ")[0];
+	}
+	const externalUrl = user.external_urls?.spotify || "#";
 
 	userInfo.innerHTML = `
         <h2>
-        ${firstName}
-        <a href="${externalUrl}" target="_blank" id="spotify-external-link">↗</a>
+            ${displayName}
+            <a href="${externalUrl}" target="_blank" id="spotify-external-link">↗</a>
         </h2>
-        ${email ? `<p>${email}</p>` : ""}
         <p id="spotify-connected">Connected ✓</p>
-        
     `;
+
+	// Ask background script to inject YouTube title reader
+	setTimeout(() => {
+		chrome.runtime.sendMessage({ action: "injectScript" });
+	}, 100);
 }
+
+// Receive YouTube title from background
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	if (message.action === "youtubeTitle") {
+		// Take the title and make a request to Spotify API to search and return results
+		const appContent = document.querySelector(".app-content");
+
+		const title = message.title;
+		fetch(`${API_BASE}/spotify/search?query=${encodeURIComponent(title)}`)
+			.then((response) => response.json())
+			.then((data) => {
+				console.log("Spotify search results:", data);
+				// Handle the search results
+				if (data.tracks && data.tracks.items.length > 0) {
+					const track = data.tracks.items[0];
+					// Loop and make ul list of results
+					const resultsList = document.createElement("ul");
+					data.tracks.items.forEach((track) => {
+						const listItem = document.createElement("li");
+						listItem.textContent = `${track.name} - ${track.artists
+							.map((artist) => artist.name)
+							.join(", ")}`;
+						resultsList.appendChild(listItem);
+					});
+					appContent.innerHTML = "";
+					appContent.appendChild(resultsList);
+				} else {
+					appContent.innerHTML = `<p>No results found for "${title}".</p>`;
+				}
+			})
+			.catch((error) => {
+				console.error("Error searching Spotify:", error);
+				appContent.innerHTML = `<p>Error searching Spotify. Please try again.</p>`;
+			});
+	}
+});
 
 // Login button handler
 loginBtn.addEventListener("click", async () => {
@@ -124,16 +163,13 @@ loginBtn.addEventListener("click", async () => {
 		const response = await fetch(`${API_BASE}/auth/login`);
 		const data = await response.json();
 
-		// Open auth URL in new tab
 		const tab = await chrome.tabs.create({ url: data.auth_url });
 
-		// Notify background script
 		chrome.runtime.sendMessage({
 			action: "authStarted",
 			tabId: tab.id,
 		});
 
-		// Close popup
 		window.close();
 	} catch (error) {
 		console.error("Error initiating login:", error);
@@ -159,7 +195,6 @@ logoutBtn.addEventListener("click", async () => {
 		}
 	}
 
-	// Clear local storage
 	await chrome.storage.local.remove([
 		"access_token",
 		"refresh_token",
@@ -169,4 +204,6 @@ logoutBtn.addEventListener("click", async () => {
 });
 
 // Initialize
-checkAuthStatus();
+(async function init() {
+	await checkAuthStatus();
+})();
