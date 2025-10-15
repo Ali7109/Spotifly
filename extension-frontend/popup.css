@@ -158,3 +158,61 @@ button:active {
 	padding: 20px;
 	gap: 15px;
 }
+
+.song_button {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	width: 100%;
+	background: rgba(255, 255, 255, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	border-radius: 8px;
+	padding: 10px 12px;
+	backdrop-filter: blur(6px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	transition: background 0.2s ease;
+}
+
+.song_button:hover {
+	background: rgba(255, 255, 255, 0.15);
+}
+
+.song_image {
+	width: 48px;
+	height: 48px;
+	border-radius: 6px;
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.song_title {
+	flex: 1;
+	color: white;
+	text-decoration: none;
+	font-size: 14px;
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.song_title:hover {
+	text-decoration: underline;
+	color: #1db954;
+}
+
+.add_to_playlist {
+	background: #1db954;
+	color: white;
+	font-size: 13px;
+	padding: 8px 12px;
+	border-radius: 6px;
+	width: auto;
+	white-space: nowrap;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.add_to_playlist:hover {
+	background: #1ed760;
+}

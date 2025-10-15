@@ -158,3 +158,93 @@ class SpotifyClient:
             except Exception as e:
                 print(f"Error searching tracks: {e}")
         return None
+
+    # Get playlists
+    def fetch_user_playlists(self, user_access_token, limit=20):
+        """Fetch user's playlists"""
+        headers = {
+            "Authorization": f"Bearer {user_access_token}",
+            "Content-Type": "application/json",
+        }
+        params = {"limit": limit}
+        try:
+            response = requests.get(
+                f"{self.base_url}/me/playlists", headers=headers, params=params
+            )
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(
+                    f"Error fetching playlists: {response.status_code} - {response.text}"
+                )
+        except Exception as e:
+            print(f"Error fetching playlists: {e}")
+        return None
+
+    # Add track to playlist called playlist_name, create if doesn't exist
+    def add_track_to_playlist(self, user_access_token, playlist_name, track_uri):
+        """Add a track to a user's playlist, creating the playlist if it doesn't exist"""
+        headers = {
+            "Authorization": f"Bearer {user_access_token}",
+            "Content-Type": "application/json",
+        }
+
+        # Step 1: Check if the playlist exists
+        params = {"limit": 50}  # Fetch up to 50 playlists
+        try:
+            response = requests.get(
+                f"{self.base_url}/me/playlists", headers=headers, params=params
+            )
+            if response.status_code == 200:
+                playlists = response.json().get("items", [])
+                playlist_id = None
+                for playlist in playlists:
+                    if playlist["name"] == playlist_name:
+                        playlist_id = playlist["id"]
+                        break
+
+                # Step 2: If the playlist doesn't exist, create it
+                if not playlist_id:
+                    user_profile = self.fetch_user_profile(user_access_token)
+                    if not user_profile:
+                        print("Error fetching user profile to create playlist")
+                        return False
+                    user_id = user_profile["id"]
+                    create_payload = {
+                        "name": playlist_name,
+                        "description": "Playlist created via API",
+                        "public": False,
+                    }
+                    create_response = requests.post(
+                        f"{self.base_url}/users/{user_id}/playlists",
+                        headers=headers,
+                        json=create_payload,
+                    )
+                    if create_response.status_code == 201:
+                        playlist_id = create_response.json().get("id")
+                    else:
+                        print(
+                            f"Error creating playlist: {create_response.status_code} - {create_response.text}"
+                        )
+                        return False
+
+                # Step 3: Add the track to the playlist
+                add_payload = {"uris": [track_uri]}
+                add_response = requests.post(
+                    f"{self.base_url}/playlists/{playlist_id}/tracks",
+                    headers=headers,
+                    json=add_payload,
+                )
+                if add_response.status_code == 201:
+                    return True
+                else:
+                    print(
+                        f"Error adding track to playlist: {add_response.status_code} - {add_response.text}"
+                    )
+            else:
+                print(
+                    f"Error fetching playlists: {response.status_code} - {response.text}"
+                )
+        except Exception as e:
+            print(f"Error adding track to playlist: {e}")
+        return False

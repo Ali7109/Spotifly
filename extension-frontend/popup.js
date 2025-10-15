@@ -128,24 +128,76 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		const appContent = document.querySelector(".app-content");
 
 		const title = message.title;
-		fetch(`${API_BASE}/spotify/search?query=${encodeURIComponent(title)}`)
+		if (!title) {
+			appContent.innerHTML = "<p>No title found on this page.</p>";
+			return;
+		}
+
+		appContent.innerHTML = `<p>Searching Spotify for "<strong>${title}</strong>"...</p>`;
+
+		// Call backend to search Spotify
+		/**\
+		 * Sample python backend for playlist add
+		 * @app.post("/spotify/playlists/add-track")
+				async def add_track_to_playlist(
+				playlist_name: str,
+				track_uri: str,
+				user_id: str = Depends(get_current_user),
+		 */
+		fetch(
+			`${API_BASE}/spotify/search?query=${encodeURIComponent(
+				title
+			)}&limit=3`
+		)
 			.then((response) => response.json())
 			.then((data) => {
 				console.log("Spotify search results:", data);
 				// Handle the search results
 				if (data.tracks && data.tracks.items.length > 0) {
-					const track = data.tracks.items[0];
 					// Loop and make ul list of results
-					const resultsList = document.createElement("ul");
+					appContent.innerHTML = ""; // Clear previous content
+
 					data.tracks.items.forEach((track) => {
-						const listItem = document.createElement("li");
-						listItem.textContent = `${track.name} - ${track.artists
+						const trackContainer = document.createElement("div");
+						trackContainer.className = "song_button";
+
+						// Create title link
+						const titleLink = document.createElement("a");
+						titleLink.className = "song_title";
+						titleLink.href = track.external_urls.spotify;
+						titleLink.target = "_blank";
+						titleLink.textContent = `${track.name} - ${track.artists
 							.map((artist) => artist.name)
 							.join(", ")}`;
-						resultsList.appendChild(listItem);
+
+						// Create image
+						const image = document.createElement("img");
+						image.className = "song_image";
+						image.src = track.album.images?.[0]?.url || "";
+						image.alt = `${track.name} cover`;
+						image.width = 64;
+						image.height = 64;
+
+						// Create button with URI data
+						const addButton = document.createElement("button");
+						addButton.className = "add_to_playlist";
+						addButton.textContent = "➕ Add to Playlist";
+						addButton.setAttribute("data-uri", track.uri);
+
+						// Optional: Add click handler
+						addButton.addEventListener("click", () => {
+							const uri = addButton.getAttribute("data-uri");
+							console.log("Add to playlist:", uri);
+							// Call your backend or Spotify API here
+						});
+
+						// Assemble
+						trackContainer.appendChild(image);
+						trackContainer.appendChild(titleLink);
+						trackContainer.appendChild(addButton);
+
+						appContent.appendChild(trackContainer);
 					});
-					appContent.innerHTML = "";
-					appContent.appendChild(resultsList);
 				} else {
 					appContent.innerHTML = `<p>No results found for "${title}".</p>`;
 				}

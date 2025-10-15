@@ -173,5 +173,37 @@ async def get_current_user_info(user_id: str = Depends(get_current_user)):
     return {"user_id": user_id}
 
 
+# Get playlists
+@app.get("/spotify/playlists")
+async def get_user_playlists(user_id: str = Depends(get_current_user), limit: int = 20):
+    """Get user's playlists"""
+    user_token = auth_manager.get_user_access_token(user_id)
+    if not user_token:
+        raise HTTPException(status_code=401, detail="No valid token found")
+
+    playlists = spotify_client.fetch_user_playlists(user_token, limit)
+    if playlists:
+        return playlists
+    raise HTTPException(status_code=500, detail="Unable to fetch playlists")
+
+
+# Add track_uri to playlist_name: playlist_name, track_uri
+@app.post("/spotify/playlists/add-track")
+async def add_track_to_playlist(
+    playlist_name: str,
+    track_uri: str,
+    user_id: str = Depends(get_current_user),
+):
+    """Add track to user's playlist (create if doesn't exist)"""
+    user_token = auth_manager.get_user_access_token(user_id)
+    if not user_token:
+        raise HTTPException(status_code=401, detail="No valid token found")
+
+    success = spotify_client.add_track_to_playlist(user_token, playlist_name, track_uri)
+    if success:
+        return {"detail": "Track added to playlist successfully"}
+    raise HTTPException(status_code=500, detail="Unable to add track to playlist")
+
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8080, reload=True)
